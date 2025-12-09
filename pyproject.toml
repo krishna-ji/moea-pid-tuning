@@ -1,0 +1,10 @@
+[project]
+name = "pid"
+version = "0.1.0"
+description = "Multi-Objective Neuro-Evolutionary PID Tuning for High-Dynamic Systems"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = ["numpy>=1.26.0", "matplotlib>=3.8.0"]
+
+[project.scripts]
+pid-optimize = "main:main"
