@@ -130,10 +130,10 @@ The complete trade-off surface between all three objectives:
 
 | Solution | Description | ITAE | ICS | TV |
 |----------|-------------|------|-----|-----|
-|  **Aggressive** | Minimum ITAE | Low | High | High |
-|  **Smooth** | Minimum TV | High | Medium | Low |
-|  **Efficient** | Minimum ICS | High | Low | Medium |
-|  **Balanced** | Knee Point | Medium | Medium | Medium |
+|  **Aggressive** | Minimum ITAE | 5.346 | 1404.55 | 87.15 |
+|  **Smooth** | Minimum TV | 16.914 | 1266.76 | 7.72 |
+|  **Efficient** | Minimum ICS | 62.475 | 0.55 | 30.44 |
+|  **Balanced** | Knee Point | 5.346 | 1404.55 | 87.15 |
 
 ### Time-Domain Response Comparison
 
@@ -145,6 +145,17 @@ The complete trade-off surface between all three objectives:
 - **Aggressive tune:** Fastest rise time but highest overshoot and control effort
 - **Smooth tune:** Gentlest control signal but slowest response
 - **Balanced (Knee):** Best overall compromise for most applications
+
+### Result Quality (Truthful Notes)
+
+Based on the saved run in [figures/optimization_results.json](figures/optimization_results.json):
+
+- **Mixed quality overall (some good, some “gameable”).** The Pareto front generation itself appears to work, but the *named* picks include one clearly degenerate solution.
+- **“Balanced” is not balanced in this run.** The knee-point selector returned the *same* solution as **Aggressive** (identical gains and objectives). That means the “knee point” logic did not find a distinct compromise for this Pareto front.
+- **The “Efficient (min ICS)” solution is effectively “do nothing.”** Its ITAE is ~62.5, which is what you get if the altitude barely moves (error stays near the 5 m setpoint for ~5 s). That makes the ICS objective easy to minimize by not applying thrust.
+- **Why this happens (implementation detail):** in [main.py](main.py), the optimized ICS is computed from the absolute thrust signal (hover thrust + PID output), not “extra” control above hover. Minimizing absolute thrust incentivizes under-thrusting/falling unless you add constraints/penalties.
+
+If you want “Efficient” to mean *energy-efficient while still tracking*, a common fix is to compute ICS on the **delta thrust** (or normalized PWM), and/or add a hard constraint/penalty on final error / minimum altitude reached.
 
 ### PID Gains Distribution
 
